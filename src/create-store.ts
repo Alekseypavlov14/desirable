@@ -1,9 +1,16 @@
 import { deepMergeAndAssign, Assignable } from "@oleksii-pavlov/deep-merge"
+import { IDCreator } from "./id-creator"
+
+interface Subscription<State> {
+	callback: SubscriptionCallback<State>
+	id: number
+}
+
+type SubscriptionCallback<State> = (state: State) => void
 
 export function createStore<
   State extends Assignable, 
-  ReducerCreator extends (state: State) => any,
-  Callback extends (state: State) => void
+  ReducerCreator extends (state: State) => any
 >
 (
   initialState: State, 
@@ -14,17 +21,27 @@ export function createStore<
 
   subscribeOnReducerCalls(reducers, runSubscribers)
 	
-  const subscribers: Callback[] = []
+  let subscriptions: Subscription<State>[] = []
+	const subscriptionIds = new IDCreator()
 
 	function getState() {
 		return deepObjectClone(state)
 	}
 
-	function subscribe(callback: Callback) {
-		subscribers.push(callback)
+	function subscribe(callback: SubscriptionCallback<State>) {
+		const subscription = createSubscription(callback)
+		subscriptions.push(subscription)
+
+		return () => unsubscribeById(subscription.id)
+	}
+	function createSubscription<State>(callback: SubscriptionCallback<State>) {
+		return ({ callback, id: subscriptionIds.createId() })
+	}
+	function unsubscribeById(subscriptionId: number) {
+		subscriptions = subscriptions.filter(subscription => subscription.id !== subscriptionId)
 	}
 	function runSubscribers() {
-		subscribers.forEach(subscriber => subscriber(getState()))
+		subscriptions.forEach(subscription => subscription.callback(getState()))
 	}
 
 	function resetState() {
@@ -58,25 +75,3 @@ function subscribeOnReducerCalls<Reducers extends Assignable>(reducers: Reducers
     })
   })
 }
-
-// const initialState = {
-//   count: 0,
-//   count1: 0
-// }
-
-// const store = createStore(initialState, (state) => ({
-//   increment: (payload: number) => state.count += payload,
-//   decrement: () => state.count -= 1,
-//   double: () => {
-//     state.count = 1
-//     state.count1 = 1
-//   }
-// }))
-
-// store.subscribe(console.table)
-
-// store.reducers.increment(4)
-// store.reducers.increment(7)
-// store.reducers.decrement()
-// store.reducers.double()
-// store.reducers.double()
