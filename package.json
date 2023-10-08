@@ -1,0 +1,22 @@
+{
+  "name": "state-manager",
+  "version": "1.0.0",
+  "description": "State Manager",
+  "main": "./build/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "keywords": [
+    "state"
+  ],
+  "author": "Oleksii Pavlov <aleshapavlov9@gmail.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.5.1",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "@oleksii-pavlov/deep-merge": "^1.0.2"
+  }
+}
