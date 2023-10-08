@@ -5,7 +5,8 @@
   "main": "./build/index.js",
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "test": "jest"
   },
   "keywords": [
     "state"
@@ -13,7 +14,10 @@
   "author": "Oleksii Pavlov <aleshapavlov9@gmail.com>",
   "license": "ISC",
   "devDependencies": {
-    "@types/node": "^20.5.1",
+    "@types/jest": "^29.5.5",
+    "@types/node": "^20.8.3",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
     "typescript": "^5.1.6"
   },
   "dependencies": {

@@ -40,6 +40,9 @@ export function createStore<
 	function unsubscribeById(subscriptionId: number) {
 		subscriptions = subscriptions.filter(subscription => subscription.id !== subscriptionId)
 	}
+	function clearAllSubscriptions() {
+		subscriptions = []
+	}
 	function runSubscribers() {
 		subscriptions.forEach(subscription => subscription.callback(getState()))
 	}
@@ -57,7 +60,8 @@ export function createStore<
 		subscribe,
 		reducers,
 		init,
-		resetState
+		resetState,
+		clearAllSubscriptions
 	}
 }
 
