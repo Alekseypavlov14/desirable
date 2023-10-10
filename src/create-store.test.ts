@@ -14,6 +14,30 @@ describe('create-store', () => {
     expect(isInitialized).toBeTruthy() // check if initialized
   })
 
+  it('store.on()', () => {
+    const initialState = {
+      a: 0,
+      b: 0
+    }
+
+    const counterStore = createStore(initialState, (state) => ({
+      incrementA: () => state.a++,
+      incrementB: () => state.b++
+    }))
+
+    let callbackCalls = 0
+
+    counterStore
+      .on((state) => state.a) // subscribe on specific slice
+      .subscribe(() => callbackCalls++) // increment callbackCalls
+
+    counterStore.reducers.incrementA() // triggers callback
+    counterStore.reducers.incrementA() // triggers callback
+    counterStore.reducers.incrementB()
+
+    expect(callbackCalls).toBe(2)
+  })
+
   it('unsubscribe', () => {
     const counterStore = createMockStore() // create new store
 

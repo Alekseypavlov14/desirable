@@ -1,12 +1,7 @@
-import { deepMergeAndAssign, Assignable } from "@oleksii-pavlov/deep-merge"
+import { Subscribable, Subscription, SubscriptionCallback, Selector, UnsubscribeFunction } from "./shared/types"
+import { deepObjectClone, subscribeOnReducerCalls } from "./shared/utils"
+import { Assignable } from "@oleksii-pavlov/deep-merge"
 import { IDCreator } from "./id-creator"
-
-interface Subscription<State> {
-	callback: SubscriptionCallback<State>
-	id: number
-}
-
-type SubscriptionCallback<State> = (state: State) => void
 
 export function createStore<
   State extends Assignable, 
@@ -17,6 +12,7 @@ export function createStore<
   reducerCreator: ReducerCreator
 ) {
 	let state = deepObjectClone(initialState)
+	let previousState = deepObjectClone(state)
 	const reducers: ReturnType<ReducerCreator> = reducerCreator(state)
 
   subscribeOnReducerCalls(reducers, runSubscribers)
@@ -24,40 +20,56 @@ export function createStore<
   let subscriptions: Subscription<State>[] = []
 	const subscriptionIds = new IDCreator()
 
-	function getState() {
+	function getState(): State {
 		return deepObjectClone(state)
 	}
 
-	function subscribe(callback: SubscriptionCallback<State>) {
+	function subscribe(callback: SubscriptionCallback<State>): UnsubscribeFunction {
 		const subscription = createSubscription(callback)
 		subscriptions.push(subscription)
 
 		return () => unsubscribeById(subscription.id)
 	}
-	function createSubscription<State>(callback: SubscriptionCallback<State>) {
+	function on(selector: Selector<State>): Subscribable<State> {
+		return ({
+			subscribe: (callback: SubscriptionCallback<State>): UnsubscribeFunction => {
+				return subscribe((state) => {
+					const previousStateSlice = selector(previousState)
+					const updatedStateSlice = selector(state)
+	
+					if (previousStateSlice === updatedStateSlice) return
+
+					callback(state)
+				})
+			}
+		})
+	}
+	function createSubscription<State>(callback: SubscriptionCallback<State>): Subscription<State> {
 		return ({ callback, id: subscriptionIds.createId() })
 	}
-	function unsubscribeById(subscriptionId: number) {
+	function unsubscribeById(subscriptionId: number): void {
 		subscriptions = subscriptions.filter(subscription => subscription.id !== subscriptionId)
 	}
-	function clearAllSubscriptions() {
+	function clearAllSubscriptions(): void {
 		subscriptions = []
 	}
-	function runSubscribers() {
+	function runSubscribers(): void {
 		subscriptions.forEach(subscription => subscription.callback(getState()))
+		previousState = getState()
 	}
 
-	function resetState() {
+	function resetState(): void {
 		state = deepObjectClone(initialState)
 	}
 
-	function init() {
+	function init(): void {
 		runSubscribers()
 	}
 
 	return {
 		getState,
 		subscribe,
+		on,
 		reducers,
 		init,
 		resetState,
@@ -65,17 +77,3 @@ export function createStore<
 	}
 }
 
-function deepObjectClone<T extends Assignable>(object: T): T {
-	return deepMergeAndAssign({}, object)
-}
-
-function subscribeOnReducerCalls<Reducers extends Assignable>(reducers: Reducers, onMethodCalled: () => void) {
-  Object.keys(reducers).forEach((key: keyof Reducers) => {
-    reducers[key] = new Proxy(reducers[key], {
-      apply(target, thisArg, argArray) {
-        target.apply(thisArg, argArray)
-        onMethodCalled()
-      },
-    })
-  })
-}
