@@ -1,5 +1,5 @@
 {
-  "name": "@oleksii-pavlov/desireable",
+  "name": "desireable",
   "version": "0.1.0",
   "description": "State manager for vanilla js application and not only",
   "main": "./build/index.js",
