@@ -21,6 +21,6 @@
     "typescript": "^5.1.6"
   },
   "dependencies": {
-    "@oleksii-pavlov/deep-merge": "^1.0.2"
+    "@oleksii-pavlov/deep-merge": "^1.2.1"
   }
 }

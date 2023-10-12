@@ -14,28 +14,32 @@ describe('create-store', () => {
     expect(isInitialized).toBeTruthy() // check if initialized
   })
 
-  it('store.on()', () => {
+  it('subscribe on specific slice', () => {
     const initialState = {
-      a: 0,
-      b: 0
+      address: {
+        country: 'Ukraine',
+        city: 'Odesa'
+      },
+      age: 16
     }
 
-    const counterStore = createStore(initialState, (state) => ({
-      incrementA: () => state.a++,
-      incrementB: () => state.b++
+    const userStore = createStore(initialState, (state) => ({
+      changeCountry: (country: string) => state.address.country = country,
+      changeCity: (city: string) => state.address.city = city,
+      updateAge: (age: number) => state.age = age
     }))
 
-    let callbackCalls = 0
+    let howManyTimesAddressChanged = 0
 
-    counterStore
-      .on((state) => state.a) // subscribe on specific slice
-      .subscribe(() => callbackCalls++) // increment callbackCalls
+    userStore
+      .on((state) => state.address) // subscribe only on address changing
+      .subscribe(() => howManyTimesAddressChanged++) // increment callbackCalls
 
-    counterStore.reducers.incrementA() // triggers callback
-    counterStore.reducers.incrementA() // triggers callback
-    counterStore.reducers.incrementB()
+    userStore.reducers.changeCountry('Romania') // address changed
+    userStore.reducers.changeCity('Brasov') // address changed
+    userStore.reducers.updateAge(17)
 
-    expect(callbackCalls).toBe(2)
+    expect(howManyTimesAddressChanged).toBe(2)
   })
 
   it('unsubscribe', () => {

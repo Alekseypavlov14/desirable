@@ -13,4 +13,4 @@ export interface Subscription<State> {
 
 export type UnsubscribeFunction = () => void
 
-export type Selector<State> = (state: State) => void
+export type Selector<State> = (state: State) => any

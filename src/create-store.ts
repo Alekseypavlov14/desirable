@@ -1,6 +1,6 @@
 import { Subscribable, Subscription, SubscriptionCallback, Selector, UnsubscribeFunction } from "./shared/types"
-import { deepObjectClone, subscribeOnReducerCalls } from "./shared/utils"
-import { Assignable } from "@oleksii-pavlov/deep-merge"
+import { Assignable, deepClone, deepCompare } from "@oleksii-pavlov/deep-merge"
+import { subscribeOnReducerCalls } from "./shared/utils"
 import { IDCreator } from "./id-creator"
 
 export function createStore<
@@ -11,8 +11,8 @@ export function createStore<
   initialState: State, 
   reducerCreator: ReducerCreator
 ) {
-	let state = deepObjectClone(initialState)
-	let previousState = deepObjectClone(state)
+	let state = deepClone(initialState)
+	let previousState = deepClone(state)
 	const reducers: ReturnType<ReducerCreator> = reducerCreator(state)
 
   subscribeOnReducerCalls(reducers, runSubscribers)
@@ -21,7 +21,7 @@ export function createStore<
 	const subscriptionIds = new IDCreator()
 
 	function getState(): State {
-		return deepObjectClone(state)
+		return deepClone(state)
 	}
 
 	function subscribe(callback: SubscriptionCallback<State>): UnsubscribeFunction {
@@ -37,7 +37,7 @@ export function createStore<
 					const previousStateSlice = selector(previousState)
 					const updatedStateSlice = selector(state)
 	
-					if (previousStateSlice === updatedStateSlice) return
+					if (deepCompare(previousStateSlice, updatedStateSlice)) return
 
 					callback(state)
 				})
@@ -55,11 +55,11 @@ export function createStore<
 	}
 	function runSubscribers(): void {
 		subscriptions.forEach(subscription => subscription.callback(getState()))
-		previousState = getState()
+		previousState = deepClone(getState())
 	}
 
 	function resetState(): void {
-		state = deepObjectClone(initialState)
+		state = deepClone(initialState)
 	}
 
 	function init(): void {

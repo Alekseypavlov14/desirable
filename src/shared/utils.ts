@@ -1,8 +1,4 @@
-import { deepMergeAndAssign, Assignable } from "@oleksii-pavlov/deep-merge"
-
-export function deepObjectClone<T extends Assignable>(object: T): T {
-	return deepMergeAndAssign({}, object)
-}
+import { Assignable } from "@oleksii-pavlov/deep-merge"
 
 // adds callback to each reducer call
 // For example, counterStore.reducers.increment() will trigger callback 
