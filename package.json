@@ -1,7 +1,7 @@
 {
-  "name": "state-manager",
+  "name": "desirable",
   "version": "1.0.0",
-  "description": "State Manager",
+  "description": "State manager for vanilla js application and not only",
   "main": "./build/index.js",
   "scripts": {
     "build": "tsc",
@@ -9,7 +9,7 @@
     "test": "jest"
   },
   "keywords": [
-    "state"
+    "state manager"
   ],
   "author": "Oleksii Pavlov <aleshapavlov9@gmail.com>",
   "license": "ISC",

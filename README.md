@@ -1,9 +1,10 @@
-# [State manager] - effective solution for state management
+# Desirable - effective solution for state management
 
 ### Basic example
----
 
 ```ts
+import { createStore } from '@oleksii-pavlov/desireable'
+
 const initialStore = {
   counter: 0
 }
@@ -24,20 +25,61 @@ counterStore.reducers.decrement()
 ```
 
 ### Comparing with Redux Toolkit and Zustand
----
-[State manager] requires less boilerplate than Redux Toolkit. In comparison with Zustand, it has some pluses like dividing data and reducers saving API effectiveness and ```createStore()``` does not require explicit typing to write reducers (State type is got from ```initialState```). Also, [State manager] both gives an access to the core processes of the state management (initialization, resetting, subscription clearing) and allows not to waste time writing boilerplate. Except of it, [State Manager] is not only for React - you can use wherever you need and for React, there is an especial module (```'@oleksii-pavlov/[State manager]/react```)
 
-### API
----
-[State manager] provides an utility to create stores ```createStore()```
-It requires two arguments:
-- initialState - plain object that contains initial state data
-- reducerCreator - function that has a parameter 'state' and returns reducers object. Reducers object has methods that updates state ([example](#basic-example))
+**Desireable** requires less boilerplate than Redux Toolkit. In comparison with Zustand, it has some pluses like dividing data and reducers saving API effectiveness and ```createStore()``` does not require explicit typing to write reducers (State type is got from ```initialState```). Also, **Desireable** both gives an access to the core processes of the state management (initialization, resetting, subscription clearing) and allows not to waste time writing boilerplate. Except of it, **Desireable** is not only for React - you can use wherever you need and for React, there is an especial module (```'@oleksii-pavlov/desireable/react```)
 
-```createStore()``` returns store that has properties and methods:
-- subscribe(callback) - subscribes on state changes. The callback will be called every time when the state is changed with one argument - new state
-- reducers - an object that is used to update state. Reducers object contains all reducers as its methods
-- getState() - returns current state
-- init() - not-required to use. It triggers calling all subscriptions callbacks
-- resetState() - replaces current state with initial one and triggers calling all subscriptions callbacks
-- clearAllSubscriptions() - removes all subscriptions
+### Create a store
+
+```ts
+import { createStore } from '@oleksii-pavlov/desireable'
+
+// define initial state
+const initialState = {
+  counter: 0
+}
+
+// create store by passing initial state and adding reducers
+const counterStore = createStore(initialState, (state) => ({
+  increment: () => state.counter++,
+  decrement: () => state.counter--,
+  updateValue: (value: number) => state.counter = value,
+}))
+```
+
+### Reducers
+```ts
+createStore(initialState, (state) => ({
+  increment: () => state.counter++,
+  decrement: () => state.counter--,
+  updateValue: (value: number) => state.counter = value,
+}))
+```
+
+As you can see, to create **reducers** after **initialState** you pass to ```createStore()``` a callback which takes an argument **state** are returns an object with methods which are reducers and they can update state. These methods take **payload** arguments that can be used to update state. 
+
+After creation, you can access your reducers by ```store.reducers``` object that contains the set of reducers. In this example, you would use ```store.reducers.increment()```
+
+### Subscribe on state changes
+---
+
+After you learned how to [create](#create-a-store) and [update](#reducers) the state, we need to learn how to subscribe on state changes. Here is an example:
+
+```ts
+import { createStore } from '@oleksii-pavlov/desireable'
+
+const initialState = {
+  counter: 0
+}
+
+const counterStore = createStore(initialState, (state) => ({
+  increment: () => state.counter++,
+  decrement: () => state.counter--,
+}))
+
+counterStore.subscribe((state) => console.log('Counter value:', state.counter))
+
+counterStore.reducers.increment() // Counter value: 1
+counterStore.reducers.increment() // Counter value: 2
+```
+
+Using ```store.subscribe()``` you can subscribe on a store and listen to its state changes. ```store.subscribe()``` takes a callback as an argument. This callback has one parameter **state** which gives an access to the actual state of the store.
