@@ -177,7 +177,7 @@ export const languageStore = createStore(initialState, (state) => ({
 ```ts
 // features/send-email.ts
 import { accountStore } from '../stores/account-store'
-import { language } from '../stores/language-store'
+import { languageStore } from '../stores/language-store'
 
 export function sendLetterByEmail() {
   const accountState = accountStore.getState() // { login: 'Luiza', followers: 10 }
