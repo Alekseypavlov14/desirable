@@ -26,7 +26,7 @@ counterStore.reducers.decrement()
 
 ### Comparing with Redux Toolkit and Zustand
 
-**Desirable** requires less boilerplate than Redux Toolkit. In comparison with Zustand, it has some pluses like dividing data and reducers saving API effectiveness and ```createStore()``` does not require explicit typing to write reducers (State type is got from ```initialState```). Also, **Desirable** both gives an access to the core processes of the state management (initialization, resetting, subscription clearing) and allows not to waste time writing boilerplate. Except of it, **Desirable** is not only for React - you can use wherever you need and for React, there is an especial module (```'@oleksii-pavlov/desirable/react```)
+**Desirable** requires less boilerplate than Redux Toolkit. In comparison with Zustand, it has some pluses like dividing data and reducers saving API effectiveness and ```createStore()``` does not require explicit typing to write reducers (State type is got from ```initialState```). Also, **Desirable** both gives an access to the core processes of the state management (initialization, resetting, subscription clearing) and allows not to waste time writing boilerplate. Except of it, **Desirable** is not only for React - you can use wherever you need and for React, there is an especial module ([@oleksii-pavlov/desirable/react](#react-version))
 
 ### Create a store
 
@@ -86,29 +86,31 @@ Using ```store.subscribe()``` you can subscribe on a store and listen to its sta
 
 ### Subscribe on specific slice. How avoid unnecessary callback calls?
 
-Sometimes we need to do something when some specific pieces of state updated only. For example, there is a store that contains user's data and there are slices with name and with age. We do not want to change "Welcome" message each time the age has been changed and we do not want also to change the age in account settings if the name was changed. We want to make them independent but inside of a single store. For that, we can **subscribe on a specific slice**:
+Sometimes we need to do something when some specific pieces of state updated only. For example, we can have a store that contains data about the user account and it has login and profile description. We want to update description field after the description is updated but we do not need to rerender login section. We want to make them independent but inside of a single store. For that, we can **subscribe on a specific slice**:
 
 ```ts
 const initialState = {
-  name: 'Bob',
-  age: 23
+  login: 'Oleksii',
+  description: 'The Frontend developer from Ukraine'
 }
 
-const userStore = (initialState, (state) => ({
-  updateName: (name: string) => state.name = name,
-  updateAge: (age: number) => state.age = age
+const accountStore = createStore(initialState, (state) => ({
+  updateLogin: (login: string) => state.login = login,
+  updateDescription: (description: string) => state.description = description,
 }))
 
-// subscribe to change "Welcome" message each time the name changes
-userStore.on((state) => state.name).subscribe((state) => {
-  console.log('The "Welcome" message is updated') // update "Welcome" message
+// subscribe on changes of "description" slice
+accountStore.on(state => state.description).subscribe(state => {
+  console.log('Description updated')
 })
 
-userStore.reducers.updateName('Bobby') // console: The "Welcome" message is updated
-userStore.reducers.updateAge(17) // nothing was called
+accountStore.reducers.updateDescription('The Fullstack developer from Ukraine')
+// console: 'Description updated'
+accountStore.reducers.updateLogin('Oleksii Pavlov')
+// nothing happened
 ```
 
-Here you can see a new method of the store - ```store.on()```. It takes **selector** callback that takes **state** and returns **specific slice** that we want to listen to. ```store.on()``` method return **Subscribable** object. That means that we can call its ```subscribe()``` method and it works the same way as ```store.subscribe()```. In this example, we subscribed name value. We also can subscribe on object and each time it is changed (its properties are changed) the callback will be called. Objects are compared recursively so even changes of nested objects are listened.
+Here you can see a new method of the store - ```store.on()```. It takes **selector** callback that takes **state** and returns **specific slice** that we want to listen to. ```store.on()``` method return **Subscribable** object. That means that we can call its ```subscribe()``` method and it works the same way as ```store.subscribe()```. In this example, we subscribed "description" value. We also can subscribe on object and each time it is changed (its properties are changed) the callback will be called. Objects are compared recursively so even changes of nested objects are listened.
 
 Advice: if you want to subscribe a few specific slices in the same state, you could think of splitting the store to some small stores in case it is possible.
 
@@ -195,7 +197,7 @@ export function sendLetterByEmail() {
 
 ### React version
 
-If you have a react application, you might be more comfortable to use **react version** of this state manager. For that, simply import ```createStore()``` from ```@oleksii-pavlov/desirable/react```. This ```createStore()``` has the same API but it returns object with one more method ```useSelector```. You need to use it this way: 
+If you have a **React** application, you might be more comfortable to use **React version** of this state manager. For that, simply import ```createStore()``` from ```@oleksii-pavlov/desirable/react```. This ```createStore()``` has [the same API](#basic-example) but it returns object with one more method ```useSelector```. You need to use it this way: 
 
 ```ts
 // component.tsx
@@ -230,3 +232,5 @@ export const counterStore = createStore(initialState, (state) => ({
 export const useCounterSelector = counterStore.useSelector
 export const { increment, decrement } = counterStore.reducers
 ```
+
+You can see that the ```createStore()``` returns store with ```useSelector``` method. It is highly recommended to rename it to something unique not to have conflicts of names in your code. Then you can use this **hook** in your components: it takes **Selector** (as [store.on()](#subscribe-on-specific-slice-how-avoid-unnecessary-callback-calls) method) and returns selected slice of the state. The behavior of this returned value is the same as ```useState()``` returned value. Or you can compare this ```useSelector()``` with React-Redux ```useSelector()``` that you might have used with Redux Toolkit.
