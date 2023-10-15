@@ -192,3 +192,41 @@ export function sendLetterByEmail() {
 - ```store.init()``` triggers subscriptions call without updating the data
 - ```store.resetState()``` updates state by setting it to ```initialState``` given to ```createStore()```
 - ```store.clearAllSubscriptions()``` removes all subscriptions by calling ```unsubscribe()``` for each subscription
+
+### React version
+
+If you have a react application, you might be more comfortable to use **react version** of this state manager. For that, simply import ```createStore()``` from ```@oleksii-pavlov/desirable/react```. This ```createStore()``` has the same API but it returns object with one more method ```useSelector```. You need to use it this way: 
+
+```ts
+// component.tsx
+import { useCounterSelector, increment, decrement } from './counter-store'
+
+const Component = () => {
+  const counter = useCounterSelector((state) => state.counter)
+
+  return (
+    <>
+      <div>Counter: {counter}</div>
+      <button onClick={increment}>Increment</button>
+      <button onClick={decrement}>Decrement</button>
+    </>
+  )
+} 
+```
+
+```ts
+// counter-store.ts
+import { createStore } from '@oleksii-pavlov/desirable/react'
+
+const initialState = {
+  counter: 0
+}
+
+export const counterStore = createStore(initialState, (state) => ({
+  increment: () => state.counter++,
+  decrement: () => state.counter--
+}))
+
+export const useCounterSelector = counterStore.useSelector
+export const { increment, decrement } = counterStore.reducers
+```
