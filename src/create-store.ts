@@ -10,11 +10,12 @@ export function createStore<
   initialState: State, 
   reducerCreator: ReducerCreator
 ): BaseStore<State, ReturnType<ReducerCreator>> {
-	let state = deepClone(initialState)
-	let previousState = deepClone(state)
+	let state = deepClone(initialState) // create state variable
+	let previousState = deepClone(state) // create previous state variable (is used to check updates)
+
 	const reducers: ReturnType<ReducerCreator> = reducerCreator(state)
 
-  subscribeOnReducerCalls(reducers, runSubscribers)
+  subscribeOnReducerCalls(reducers, runSubscribers) // call runReducers each time reducer is called
 	
   let subscriptions: Subscription<State>[] = []
 	const subscriptionIds = new IDCreator()

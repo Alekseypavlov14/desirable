@@ -8,14 +8,17 @@ export function createUseSelectorCallback<
   ReducerCreator extends (state: State) => any
 >(store: BaseStore<State, ReturnType<ReducerCreator>>) {
   return <SelectedValue>(selector: Selector<State, SelectedValue>): SelectedValue => {
-    const initialValue = selector(store.getState())
-    const [value, updateValue] = useState<SelectedValue>(initialValue)
+    // create reactive state
+    const [value, updateValue] = useState<SelectedValue>(selector(store.getState()))
 
     useEffect(() => {
+      // subscribe on changes to update react state
       const unsubscribe = store.on(selector).subscribe((state) => updateValue(selector(state)))
+      // unsubscribe when react component is unmounted (for optimization)
       return unsubscribe
     }, [])
 
+    // return reactive specified value
     return value
   }
 }

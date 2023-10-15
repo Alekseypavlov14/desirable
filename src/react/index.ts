@@ -10,9 +10,12 @@ export function createStore<
   initialState: State, 
   reducerCreator: ReducerCreator
 ): ReactStore<State, ReturnType<ReducerCreator>> {
+  // create base store
   const store = createBaseStore(initialState, reducerCreator)
 
+  // create react hooks
   const useSelector = createUseSelectorCallback(store)
   
+  // return modified store
   return { ...store, useSelector }
 }
