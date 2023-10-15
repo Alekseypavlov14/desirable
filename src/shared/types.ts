@@ -13,4 +13,14 @@ export interface Subscription<State> {
 
 export type UnsubscribeFunction = () => void
 
-export type Selector<State> = (state: State) => any
+export type Selector<State, SelectedValue> = (state: State) => SelectedValue
+
+export interface BaseStore<State, Reducers> {
+	getState: () => State
+	subscribe: SubscribeFunction<State>
+	on: <SelectedValue>(selector: Selector<State, SelectedValue>) => Subscribable<State>
+	reducers: Reducers,
+	init: () => void,
+	resetState: () => void,
+	clearAllSubscriptions: () => void
+}

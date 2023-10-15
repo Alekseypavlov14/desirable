@@ -1,4 +1,4 @@
-import { Subscribable, Subscription, SubscriptionCallback, Selector, UnsubscribeFunction } from "./shared/types"
+import { Subscribable, Subscription, SubscriptionCallback, Selector, UnsubscribeFunction, BaseStore } from "./shared/types"
 import { Assignable, deepClone, deepCompare } from "@oleksii-pavlov/deep-merge"
 import { subscribeOnReducerCalls } from "./shared/utils"
 import { IDCreator } from "./id-creator"
@@ -6,11 +6,10 @@ import { IDCreator } from "./id-creator"
 export function createStore<
   State extends Assignable, 
   ReducerCreator extends (state: State) => any
->
-(
+>(
   initialState: State, 
   reducerCreator: ReducerCreator
-) {
+): BaseStore<State, ReturnType<ReducerCreator>> {
 	let state = deepClone(initialState)
 	let previousState = deepClone(state)
 	const reducers: ReturnType<ReducerCreator> = reducerCreator(state)
@@ -30,7 +29,7 @@ export function createStore<
 
 		return () => unsubscribeById(subscription.id)
 	}
-	function on(selector: Selector<State>): Subscribable<State> {
+	function on<SelectedValue>(selector: Selector<State, SelectedValue>): Subscribable<State> {
 		return ({
 			subscribe: (callback: SubscriptionCallback<State>): UnsubscribeFunction => {
 				return subscribe((state) => {
