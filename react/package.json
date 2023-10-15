@@ -1,0 +1,7 @@
+{
+  "name": "@oleksii-pavlov/desirable-react",
+  "description": "The React version of Desirable",
+  "main": "../build/react/index.js",
+  "author": "Oleksii Pavlov <aleshapavlov9@gmail.com>",
+  "license": "ISC"
+}
