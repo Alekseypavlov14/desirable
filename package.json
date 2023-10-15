@@ -1,6 +1,6 @@
 {
   "name": "@oleksii-pavlov/desirable",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "State manager for vanilla js application and not only",
   "main": "./build/index.js",
   "scripts": {
