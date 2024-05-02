@@ -1,3 +1,4 @@
+import { SubscriptionCondition } from './types'
 import { Assignable } from "@oleksii-pavlov/deep-merge"
 
 // adds callback to each reducer call
@@ -11,4 +12,8 @@ export function subscribeOnReducerCalls<Reducers extends Assignable>(reducers: R
       },
     })
   })
+}
+
+export function getDefaultSubscriptionCondition<State>(): SubscriptionCondition<State> {
+  return () => true
 }

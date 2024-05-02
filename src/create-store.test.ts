@@ -14,6 +14,24 @@ describe('create-store', () => {
     expect(isInitialized).toBeTruthy() // check if initialized
   })
 
+  it('run slice subscriptions on state init', () => {
+    const initialState = {
+      names: ['Alex', 'Jack', 'Dima']
+    }
+
+    const store = createStore(initialState, (state) => ({
+      updateNames: (newNames: string[]) => state.names = newNames
+    }))
+
+    let subscriptionCalls = 0
+
+    store.on(state => state.names).subscribe(() => subscriptionCalls++)
+
+    store.init()
+
+    expect(subscriptionCalls).toBe(1)
+  })
+
   it('subscribe on specific slice', () => {
     const initialState = {
       address: {

@@ -5,9 +5,11 @@ export interface Subscribable<State> {
 export type SubscribeFunction<State> = (callback: SubscriptionCallback<State>) => UnsubscribeFunction
 
 export type SubscriptionCallback<State> = (state: State) => void
+export type SubscriptionCondition<State> = (state: State) => void
 
 export interface Subscription<State> {
 	callback: SubscriptionCallback<State>
+	condition: SubscriptionCondition<State>
 	id: number
 }
 

@@ -1,6 +1,6 @@
-import { Subscribable, Subscription, SubscriptionCallback, Selector, UnsubscribeFunction, BaseStore } from "./shared/types"
+import { Subscribable, Subscription, SubscriptionCallback, Selector, UnsubscribeFunction, BaseStore, SubscriptionCondition } from "./shared/types"
+import { getDefaultSubscriptionCondition, subscribeOnReducerCalls } from "./shared/utils"
 import { Assignable, deepClone, deepCompare } from "@oleksii-pavlov/deep-merge"
-import { subscribeOnReducerCalls } from "./shared/utils"
 import { IDCreator } from "./id-creator"
 
 export function createStore<
@@ -25,7 +25,7 @@ export function createStore<
 	}
 
 	function subscribe(callback: SubscriptionCallback<State>): UnsubscribeFunction {
-		const subscription = createSubscription(callback)
+		const subscription = createSubscription(callback, getDefaultSubscriptionCondition())
 		subscriptions.push(subscription)
 
 		return () => unsubscribeById(subscription.id)
@@ -33,19 +33,22 @@ export function createStore<
 	function on<SelectedValue>(selector: Selector<State, SelectedValue>): Subscribable<State> {
 		return ({
 			subscribe: (callback: SubscriptionCallback<State>): UnsubscribeFunction => {
-				return subscribe((state) => {
+				const condition: SubscriptionCondition<State> = (state: State) => {
 					const previousStateSlice = selector(previousState)
 					const updatedStateSlice = selector(state)
 	
-					if (deepCompare(previousStateSlice, updatedStateSlice)) return
+					return !deepCompare(previousStateSlice, updatedStateSlice)
+				}
 
-					callback(state)
-				})
+				const subscription = createSubscription(callback, condition) 
+				subscriptions.push(subscription)
+
+				return () => unsubscribeById(subscription.id)
 			}
 		})
 	}
-	function createSubscription<State>(callback: SubscriptionCallback<State>): Subscription<State> {
-		return ({ callback, id: subscriptionIds.createId() })
+	function createSubscription<State>(callback: SubscriptionCallback<State>, condition: SubscriptionCondition<State>): Subscription<State> {
+		return ({ callback, condition: condition, id: subscriptionIds.createId() })
 	}
 	function unsubscribeById(subscriptionId: number): void {
 		subscriptions = subscriptions.filter(subscription => subscription.id !== subscriptionId)
@@ -54,7 +57,10 @@ export function createStore<
 		subscriptions.forEach(subscription => unsubscribeById(subscription.id))
 	}
 	function runSubscribers(): void {
-		subscriptions.forEach(subscription => subscription.callback(getState()))
+		subscriptions
+			.filter(subscription => subscription.condition(getState()))
+			.forEach(subscription => subscription.callback(getState()))
+
 		previousState = deepClone(getState())
 	}
 
@@ -63,7 +69,7 @@ export function createStore<
 	}
 
 	function init(): void {
-		runSubscribers()
+		subscriptions.forEach(subscription => subscription.callback(getState()))
 	}
 
 	return {
