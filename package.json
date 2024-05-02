@@ -3,6 +3,10 @@
   "version": "1.1.0",
   "description": "State manager for vanilla js application and not only",
   "main": "./build/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Alekseypavlov14/desirable"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
